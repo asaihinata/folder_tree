@@ -2,9 +2,15 @@ import pathlib
 import glob
 import os
 class Tree:
-    def __init__(self,path="",reference=True):
+    def __init__(self,path="",reference=True,skip=None):
         if path=="" or not pathlib.Path(path).is_absolute():
             raise FileNotFoundError("パスが見つかりません")
+        if isinstance(skip,str):
+            self.skiplist=[skip]
+        elif isinstance(skip,(list,tuple)):
+            self.skiplist=list(skip)
+        else:
+            self.skiplist=None
         if isinstance(reference,str):
             if reference=="absolute":
                 self.reference=False
@@ -26,9 +32,9 @@ class Tree:
         else:
             print("{indent}{branch}{dirname}".format(indent=indent_current,branch="└── " if is_last else "├── ",dirname=current))
         paths=[p for p in glob.glob(path+"/*") if os.path.isdir(p) or os.path.isfile(p)]
-        def is_last_path(i):
-            return i==len(paths)-1
         for i,p in enumerate(paths):
+            if self.skiplist is not None and pathlib.Path(p).name in self.skiplist:
+                continue
             indent_lower=indent_current
             if layer!=0:
                 if is_last:
@@ -36,15 +42,21 @@ class Tree:
                 else:
                     indent_lower+="│   "
             if os.path.isfile(p):
-                print("{indent}{branch}{filename}".format(indent=indent_lower,branch="└── " if is_last_path(i) else "├── ",filename=replaces(p.split("/")[::-1][0])))
+                print("{indent}{branch}{filename}".format(indent=indent_lower,branch="└── " if (i==len(paths)-1) else "├── ",filename=replaces(p.split("/")[::-1][0])))
             if os.path.isdir(p):
-                self.tree(p,layer=layer+1,is_last=is_last_path(i),indent_current=indent_lower,reference=reference,root=root)
+                self.tree(p,layer=layer+1,is_last=(i==len(paths)-1),indent_current=indent_lower,reference=reference,root=root)
 class Treetxt:
-    def __init__(self,path="",reference=True,save=None):
+    def __init__(self,path="",reference=True,save=None,skip=None):
         if path=="" or not pathlib.Path(path).is_absolute():
             raise FileNotFoundError("パスが見つかりません")
+        if isinstance(skip,str):
+            self.skiplist=[skip]
+        elif isinstance(skip,(list,tuple)):
+            self.skiplist=list(skip)
+        else:
+            self.skiplist=None
         if not isinstance(save,str) or not os.path.isdir(save):
-            save=os.path.join(os.path.dirname(os.path.abspath(__file__)),'tree.txt')
+            save=os.path.join(os.path.dirname(os.path.abspath(__file__)),"tree.txt")
         if isinstance(reference,str):
             if reference=="absolute":
                 self.reference=False
@@ -69,9 +81,9 @@ class Treetxt:
         else:
             self.txt+=f"{"{indent}{branch}{dirname}".format(indent=indent_current,branch="└── " if is_last else "├── ",dirname=current)}\n"
         paths=[p for p in glob.glob(path+"/*") if os.path.isdir(p) or os.path.isfile(p)]
-        def is_last_path(i):
-            return i==len(paths)-1
         for i,p in enumerate(paths):
+            if self.skiplist is not None and pathlib.Path(p).name in self.skiplist:
+                continue
             indent_lower=indent_current
             if layer!=0:
                 if is_last:
@@ -79,9 +91,9 @@ class Treetxt:
                 else:
                     indent_lower+="│   "
             if os.path.isfile(p):
-                self.txt+=f"{"{indent}{branch}{filename}".format(indent=indent_lower,branch="└── " if is_last_path(i) else "├── ",filename=replaces(p.split("/")[::-1][0]))}\n"
+                self.txt+=f"{"{indent}{branch}{filename}".format(indent=indent_lower,branch="└── " if (i==len(paths)-1) else "├── ",filename=replaces(p.split("/")[::-1][0]))}\n"
             if os.path.isdir(p):
-                self.tree(p,layer=layer+1,is_last=is_last_path(i),indent_current=indent_lower,reference=reference,root=root)
+                self.tree(p,layer=layer+1,is_last=(i==len(paths)-1),indent_current=indent_lower,reference=reference,root=root)
 if __name__=="__main__":
     paths=input("パスを指定する")
     savepaths=input("テキストファイルの保存先を指定する")
