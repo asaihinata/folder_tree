@@ -18,7 +18,7 @@ class Tree:
     def tree(self,path="",layer=0,is_last=False,indent_current=" ",reference=True,root=""):
         def replaces(path:str):
             if reference:
-                path=path.replace(root,"")
+                path=pathlib.Path(path).name
             return path
         current=replaces(path.split("/")[::-1][0])
         if layer==0:
@@ -32,9 +32,9 @@ class Tree:
             indent_lower=indent_current
             if layer!=0:
                 if is_last:
-                    indent_lower+="        "
+                    indent_lower+="    "
                 else:
-                    indent_lower+="│        "
+                    indent_lower+="│   "
             if os.path.isfile(p):
                 print("{indent}{branch}{filename}".format(indent=indent_lower,branch="└── " if is_last_path(i) else "├── ",filename=replaces(p.split("/")[::-1][0])))
             if os.path.isdir(p):
@@ -59,7 +59,7 @@ class Treetxt:
     def tree(self,path="",layer=0,is_last=False,indent_current=" ",reference=True,root=""):
         def replaces(path:str):
             if reference:
-                path=path.replace(root,"")
+                path=pathlib.Path(path).name
             return path
         current=replaces(path.split("/")[::-1][0])
         if layer==0:
@@ -73,9 +73,9 @@ class Treetxt:
             indent_lower=indent_current
             if layer!=0:
                 if is_last:
-                    indent_lower+="        "
+                    indent_lower+="    "
                 else:
-                    indent_lower+="│        "
+                    indent_lower+="│   "
             if os.path.isfile(p):
                 self.txt+=f"{"{indent}{branch}{filename}".format(indent=indent_lower,branch="└── " if is_last_path(i) else "├── ",filename=replaces(p.split("/")[::-1][0]))}\n"
             if os.path.isdir(p):
