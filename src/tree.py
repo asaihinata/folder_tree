@@ -40,9 +40,11 @@ class Tree:
             if os.path.isdir(p):
                 self.tree(p,layer=layer+1,is_last=is_last_path(i),indent_current=indent_lower,reference=reference,root=root)
 class Treetxt:
-    def __init__(self,path="",reference=True):
+    def __init__(self,path="",reference=True,save=None):
         if path=="" or not pathlib.Path(path).is_absolute():
             raise FileNotFoundError("パスが見つかりません")
+        if not isinstance(save,str) or not os.path.isdir(save):
+            save=os.path.join(os.path.dirname(os.path.abspath(__file__)),'tree.txt')
         if isinstance(reference,str):
             if reference=="absolute":
                 self.reference=False
@@ -54,7 +56,7 @@ class Treetxt:
             self.reference=False
         self.txt=""
         self.tree(path=path,reference=self.reference,root=str(pathlib.Path(path).parent))
-        with open(f"{os.path.dirname(__file__)}/tree.txt","w",encoding="utf-8") as f:
+        with open(save,"w",encoding="utf-8") as f:
             f.write(self.txt)
     def tree(self,path="",layer=0,is_last=False,indent_current=" ",reference=True,root=""):
         def replaces(path:str):
@@ -81,6 +83,7 @@ class Treetxt:
             if os.path.isdir(p):
                 self.tree(p,layer=layer+1,is_last=is_last_path(i),indent_current=indent_lower,reference=reference,root=root)
 if __name__=="__main__":
-    paths=input("パスを指定する。")
+    paths=input("パスを指定する")
+    savepaths=input("テキストファイルの保存先を指定する")
     Tree(paths)
-    Treetxt(paths)
+    Treetxt(paths,save=savepaths)
